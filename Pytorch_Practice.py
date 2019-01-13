@@ -1,29 +1,16 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+
+import torchvision
+import torchvision.transforms as transforms
+
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-t1 = torch.Tensor([
-    [1,1,1,1],
-    [1,1,1,1],
-    [1,1,1,1],
-    [1,1,1,1]
-])
+from sklearn.metrics import confusion_matrix
+#from plotcm import plot_confusion_matrix
 
-t2 = torch.Tensor([
-    [2,2,2,2],
-    [2,2,2,2],
-    [2,2,2,2],
-    [2,2,2,2]
-])
-
-t3 = torch.Tensor([
-    [3,3,3,3],
-    [3,3,3,3],
-    [3,3,3,3],
-    [3,3,3,3]
-])
-
-t = torch.stack((t1, t2, t3))
-print(t.shape)
-t = t.reshape(3, 1, 4, 4)
-print(t)
-print(t.flatten(start_dim=1))
+import pdb
