@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 
 mnist = tf.keras.datasets.mnist
 
-class_names = ['0', '1', '2', '3', '4',
-               '5', '6', '7', '8', '9']
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
 # Read in saved model (Be sure to have h5py)
-new_model = tf.keras.models.load_model("myfirstnumreader.model")
+new_model = tf.keras.models.load_model("myfirstFashionMNISTreader.model")
 
 
 # Define handy functions to display predictions
@@ -50,9 +50,8 @@ def plot_value_array(i, predictions_array, true_label):
 
 # Make a prediction!
 predictions = new_model.predict(x_test)
-# i=321 for error
-i = 3
-plt.figure(figsize=(6, 3))
+i = 321
+# plt.figure(figsize=(6, 3))
 plt.subplot(1, 2, 1)
 plot_image(i, predictions, y_test, x_test)
 plt.subplot(1, 2, 2)
