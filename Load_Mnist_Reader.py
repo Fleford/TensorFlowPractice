@@ -51,7 +51,7 @@ def plot_value_array(i, predictions_array, true_label):
 # Make a prediction!
 predictions = new_model.predict(x_test)
 # i=321 for error
-i = 3
+i = 321
 plt.figure(figsize=(6, 3))
 plt.subplot(1, 2, 1)
 plot_image(i, predictions, y_test, x_test)
