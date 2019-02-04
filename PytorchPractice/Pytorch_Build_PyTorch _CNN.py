@@ -16,4 +16,4 @@ class Network(nn.Module):
 
 
 network = Network()
-print(network)
+print(network.parameters())
