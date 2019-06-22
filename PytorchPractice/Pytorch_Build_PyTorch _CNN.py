@@ -1,3 +1,5 @@
+import numpy
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,6 +48,11 @@ class Network(nn.Module):
         return t
 
 
+# Adjust output width
+numpy.set_printoptions(linewidth=120)
+torch.set_printoptions(linewidth=120)
+
+# Prepare dataset
 train_set = torchvision.datasets.FashionMNIST(
     root='./data/FashionMNIST'
     , train=True
@@ -55,8 +62,33 @@ train_set = torchvision.datasets.FashionMNIST(
     )
 )
 
+print(train_set)
+
 # Turn off gradient calculation
 torch.set_grad_enabled(False)
 
+# Prepare instance of network
 network = Network()
-print(network.parameters())
+
+# Prepare data loader
+data_loader = torch.utils.data.DataLoader(
+    train_set, batch_size=10
+)
+
+sample = next(iter(train_set))
+batch = next(iter(data_loader))
+
+image, label = sample
+print(image.shape)
+images, labels = batch
+print(images.shape)
+
+preds = network(images)
+print(preds.argmax(dim=1))
+print(labels)
+print(preds.argmax(dim=1).eq(labels))
+
+
+
+
+
