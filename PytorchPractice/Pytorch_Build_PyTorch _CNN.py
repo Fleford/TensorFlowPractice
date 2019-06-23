@@ -3,6 +3,7 @@ import numpy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
 import torchvision
 import torchvision.transforms as transforms
@@ -48,6 +49,10 @@ class Network(nn.Module):
         return t
 
 
+def get_num_correct(preds, labels):
+    return preds.argmax(dim=1).eq(labels).sum().item()
+
+
 # Adjust output width
 numpy.set_printoptions(linewidth=120)
 torch.set_printoptions(linewidth=120)
@@ -62,31 +67,35 @@ train_set = torchvision.datasets.FashionMNIST(
     )
 )
 
-print(train_set)
-
-# Turn off gradient calculation
-torch.set_grad_enabled(False)
+# Turn on gradient calculation
+torch.set_grad_enabled(True)
 
 # Prepare instance of network
 network = Network()
 
 # Prepare data loader
 data_loader = torch.utils.data.DataLoader(
-    train_set, batch_size=10
+    train_set, batch_size=100
 )
 
-sample = next(iter(train_set))
 batch = next(iter(data_loader))
-
-image, label = sample
-print(image.shape)
 images, labels = batch
-print(images.shape)
 
 preds = network(images)
-print(preds.argmax(dim=1))
-print(labels)
-print(preds.argmax(dim=1).eq(labels))
+loss = F.cross_entropy(preds, labels)  # Calulating the loss
+
+
+# Calculate the gradients
+loss.backward()
+
+print(loss.item())
+print(get_num_correct(preds, labels))
+optimizer = optim.Adam(network.parameters(), lr=0.01)
+optimizer.step()
+preds = network(images)
+loss = F.cross_entropy(preds, labels)
+print(loss.item())
+print(get_num_correct(preds, labels))
 
 
 
