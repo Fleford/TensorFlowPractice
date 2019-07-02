@@ -78,24 +78,35 @@ data_loader = torch.utils.data.DataLoader(
     train_set, batch_size=100
 )
 
-batch = next(iter(data_loader))
-images, labels = batch
-
-preds = network(images)
-loss = F.cross_entropy(preds, labels)  # Calulating the loss
-
-
-# Calculate the gradients
-loss.backward()
-
-print(loss.item())
-print(get_num_correct(preds, labels))
+# Prepare optimizer
 optimizer = optim.Adam(network.parameters(), lr=0.01)
-optimizer.step()
-preds = network(images)
-loss = F.cross_entropy(preds, labels)
-print(loss.item())
-print(get_num_correct(preds, labels))
+
+for epoch in range(5):
+
+    total_loss = 0
+    total_correct = 0
+
+    for batch in data_loader:
+        images, labels = batch
+
+        preds = network(images)
+        loss = F.cross_entropy(preds, labels)  # Calculating the loss
+
+        # Clear out accumulated gradients
+        optimizer.zero_grad()
+
+        # Calculate the gradients
+        loss.backward()
+
+        # Update Weights
+        optimizer.step()
+
+        total_loss += loss.item()
+        total_correct += get_num_correct(preds, labels)
+
+    print("epoch:", epoch, "total correct:", total_correct, "total loss", total_loss,
+          "Accuracy", total_correct/len(train_set))
+
 
 
 
