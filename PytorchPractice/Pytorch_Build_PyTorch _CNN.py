@@ -81,7 +81,7 @@ data_loader = torch.utils.data.DataLoader(
 # Prepare optimizer
 optimizer = optim.Adam(network.parameters(), lr=0.01)
 
-for epoch in range(5):
+for epoch in range(10):
 
     total_loss = 0
     total_correct = 0

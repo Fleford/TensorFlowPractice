@@ -2,6 +2,8 @@
 
 import torch
 
+torch.set_printoptions(linewidth=120)
+
 
 dtype = torch.float
 device = torch.device("cpu")
@@ -15,29 +17,32 @@ N, D_in, H, D_out = 64, 1000, 100, 10
 x = torch.randn(N, D_in, device=device, dtype=dtype)
 y = torch.randn(N, D_out, device=device, dtype=dtype)
 print(x.shape)
+
 # Randomly initialize weights
-w1 = torch.randn(D_in, H, device=device, dtype=dtype)
-w2 = torch.randn(H, D_out, device=device, dtype=dtype)
+# Note that requires_grad=True was set
+w1 = torch.randn(D_in, H, device=device, dtype=dtype, requires_grad=True)
+w2 = torch.randn(H, D_out, device=device, dtype=dtype, requires_grad=True)
 
 learning_rate = 1e-6
-for t in range(100):
-    # Forward pass: compute predicted y
-    h = x.mm(w1)
-    h_relu = h.clamp(min=0)
-    y_pred = h_relu.mm(w2)
+for t in range(1000):
+    # Forward pass
+    y_pred = x.mm(w1).clamp(min=0).mm(w2)
 
     # Compute and print loss
-    loss = (y_pred - y).pow(2).sum().item()
-    print(t, loss)
+    loss = (y_pred - y).pow(2).sum()
+    print(t, loss.item())
 
-    # Backprop to compute gradients of w1 and w2 with respect to loss
-    grad_y_pred = 2.0 * (y_pred - y)
-    grad_w2 = h_relu.t().mm(grad_y_pred)
-    grad_h_relu = grad_y_pred.mm(w2.t())
-    grad_h = grad_h_relu.clone()
-    grad_h[h < 0] = 0
-    grad_w1 = x.t().mm(grad_h)
+    # Use autograd to compute the backward pass. This call will compute the
+    # gradient of loss with respect to all Tensors with requires_grad=True.
+    # After this call w1.grad and w2.grad will be Tensors holding the gradient
+    # of the loss with respect to w1 and w2 respectively.
+    loss.backward()
 
     # Update weights using gradient descent
-    w1 -= learning_rate * grad_w1
-    w2 -= learning_rate * grad_w2
+    with torch.no_grad():   # Perform the following without accumulating gradients
+        w1 -= learning_rate * w1.grad
+        w2 -= learning_rate * w2.grad
+
+        # Zero out gradients
+        w1.grad.zero_()
+        w2.grad.zero_()
