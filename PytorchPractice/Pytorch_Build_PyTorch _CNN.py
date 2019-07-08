@@ -53,6 +53,20 @@ def get_num_correct(preds, labels):
     return preds.argmax(dim=1).eq(labels).sum().item()
 
 
+@torch.no_grad()
+def get_all_preds(model, loader):
+    # Function that provides predictions for the entire dataset
+    all_preds = torch.tensor([])
+    for batch in loader:
+        images, labels = batch
+        preds = model(images)
+        all_preds = torch.cat(
+            (all_preds, preds)
+            ,dim=0
+        )
+    return all_preds
+
+
 # Adjust output width
 numpy.set_printoptions(linewidth=120)
 torch.set_printoptions(linewidth=120)
@@ -81,7 +95,8 @@ data_loader = torch.utils.data.DataLoader(
 # Prepare optimizer
 optimizer = optim.Adam(network.parameters(), lr=0.01)
 
-for epoch in range(10):
+print("Training Network...")
+for epoch in range(3):
 
     total_loss = 0
     total_correct = 0
@@ -107,6 +122,11 @@ for epoch in range(10):
     print("epoch:", epoch, "total correct:", total_correct, "total loss", total_loss,
           "Accuracy", total_correct/len(train_set))
 
+
+train_preds = get_all_preds(network, data_loader)
+preds_correct = get_num_correct(train_preds, train_set.targets)
+print('total correct:', preds_correct)
+print("accuracy:", preds_correct / len(train_set.targets))
 
 
 
