@@ -1,4 +1,7 @@
 import numpy
+import itertools
+import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -7,6 +10,9 @@ import torch.optim as optim
 
 import torchvision
 import torchvision.transforms as transforms
+
+from sklearn.metrics import confusion_matrix
+# from resources.plotcm import plot_confusion_matrix
 
 
 class Network(nn.Module):
@@ -67,6 +73,31 @@ def get_all_preds(model, loader):
     return all_preds
 
 
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+
 # Adjust output width
 numpy.set_printoptions(linewidth=120)
 torch.set_printoptions(linewidth=120)
@@ -96,7 +127,7 @@ data_loader = torch.utils.data.DataLoader(
 optimizer = optim.Adam(network.parameters(), lr=0.01)
 
 print("Training Network...")
-for epoch in range(3):
+for epoch in range(1):
 
     total_loss = 0
     total_correct = 0
@@ -138,8 +169,21 @@ cmt = torch.zeros(10, 10, dtype=torch.int64)
 for p in stacked:
     tl, pl = p.tolist()
     cmt[tl, pl] = cmt[tl, pl] + 1
-print(cmt)
-
-
+cm = confusion_matrix(train_set.targets, train_preds.argmax(dim=1))
+names = (
+    'T-shirt/top'
+    ,'Trouser'
+    ,'Pullover'
+    ,'Dress'
+    ,'Coat'
+    ,'Sandal'
+    ,'Shirt'
+    ,'Sneaker'
+    ,'Bag'
+    ,'Ankle boot'
+)
+plt.figure(figsize=(10, 10))
+plot_confusion_matrix(cm, names)
+plt.show()
 
 
