@@ -128,6 +128,17 @@ preds_correct = get_num_correct(train_preds, train_set.targets)
 print('total correct:', preds_correct)
 print("accuracy:", preds_correct / len(train_set.targets))
 
+print()
+print("Building confusion matrix...")
+stacked = torch.stack(
+    (train_set.targets, train_preds.argmax(dim=1))
+    , dim=1
+)
+cmt = torch.zeros(10, 10, dtype=torch.int64)
+for p in stacked:
+    tl, pl = p.tolist()
+    cmt[tl, pl] = cmt[tl, pl] + 1
+print(cmt)
 
 
 
