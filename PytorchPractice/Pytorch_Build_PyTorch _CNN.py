@@ -14,6 +14,8 @@ import torchvision.transforms as transforms
 from sklearn.metrics import confusion_matrix
 # from resources.plotcm import plot_confusion_matrix
 
+from torch.utils.tensorboard import SummaryWriter
+
 
 class Network(nn.Module):
     def __init__(self):
@@ -123,11 +125,19 @@ data_loader = torch.utils.data.DataLoader(
     train_set, batch_size=100
 )
 
+# Prepare tensorboard
+tb = SummaryWriter()
+images, labels = next(iter(data_loader))
+grid = torchvision.utils.make_grid(images)
+
+tb.add_image("images", grid)
+tb.add_graph(network, images)
+
 # Prepare optimizer
 optimizer = optim.Adam(network.parameters(), lr=0.01)
 
 print("Training Network...")
-for epoch in range(1):
+for epoch in range(10):
 
     total_loss = 0
     total_correct = 0
@@ -150,8 +160,19 @@ for epoch in range(1):
         total_loss += loss.item()
         total_correct += get_num_correct(preds, labels)
 
+    # Write to the tensorboard file
+    tb.add_scalar('Loss', total_loss, epoch)
+    tb.add_scalar('Number Correct', total_correct, epoch)
+    tb.add_scalar('Accuracy', total_correct / len(train_set), epoch)
+
+    tb.add_histogram('conv1.bias', network.conv1.bias, epoch)
+    tb.add_histogram('conv1.weight', network.conv1.weight, epoch)
+    tb.add_histogram('conv1.weight.grad', network.conv1.weight.grad, epoch)
+
     print("epoch:", epoch, "total correct:", total_correct, "total loss", total_loss,
           "Accuracy", total_correct/len(train_set))
+
+tb.close()
 
 
 train_preds = get_all_preds(network, data_loader)
